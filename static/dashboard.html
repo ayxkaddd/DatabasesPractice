@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <title>Royal Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <div class="nav">
+        <a href="#" onclick="showSection('menu-items')">Menu Items</a>
+        <a href="#" onclick="showSection('popular-menu-items')">Popular Menu Items</a>
+        <a href="#" onclick="showSection('customers')">Customers</a>
+        <a href="#" onclick="showSection('regular-customers')">Regular Customers</a>
+    </div>
+    <div class="container" id="menu-items">
+        <div class="section">
+            <h2>Menu Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item ID</th>
+                        <th>Category</th>
+                        <th>Name</th>
+                        <th>Price (UAH)</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-items-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="container" id="popular-menu-items">
+        <div class="section">
+            <h2>Popular Menu Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Total Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="popular-menu-items-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="container" id="customers">
+        <div class="section">
+            <h2>Customers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customers-body"></tbody>
+            </table>
+        </div>
+        <div class="section" id="order-history">
+            <h2>Order History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Order Date</th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody id="order-history-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="container" id="regular-customers">
+        <div class="section">
+            <h2>Regular Customers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Orders Count</th>
+                    </tr>
+                </thead>
+                <tbody id="regular-customers-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return await response.json();
+        }
+
+        function populateTable(data, tableBodyId, extraColumn = false) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                Object.keys(item).forEach(key => {
+                    const cell = document.createElement('td');
+                    cell.textContent = item[key];
+                    row.appendChild(cell);
+                });
+                if (extraColumn) {
+                    const actionCell = document.createElement('td');
+                    const button = document.createElement('button');
+                    button.textContent = 'View Orders';
+                    button.onclick = () => fetchOrderHistory(item.customer_id);
+                    actionCell.appendChild(button);
+                    row.appendChild(actionCell);
+                }
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function fetchOrderHistory(customerId) {
+            try {
+                const orderHistory = await fetchData(`/api/order_history/${customerId}`);
+                populateTable(orderHistory, 'order-history-body');
+            } catch (error) {
+                console.error('Failed to fetch order history:', error);
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.container').forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const menuItems = await fetchData('/api/menu_items/');
+                populateTable(menuItems, 'menu-items-body');
+
+                const popularMenuItems = await fetchData('/api/popular_menu_items/');
+                populateTable(popularMenuItems, 'popular-menu-items-body');
+
+                const customers = await fetchData('/api/customers/');
+                populateTable(customers, 'customers-body', true);
+
+                const regularCustomers = await fetchData('/api/regular_customers/');
+                populateTable(regularCustomers, 'regular-customers-body');
+
+                showSection('menu-items');
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            }
+        });
+    </script>
+</body>
+</html>

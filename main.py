@@ -36,14 +36,14 @@ def get_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connecti
     menu_items = []
     cursor = db.cursor()
     cursor.execute("""
-        SELECT c.name AS category, m.name AS item, m.price
+        SELECT m.item_id, c.name AS category, m.name AS item, m.price
         FROM Menu_Items m
         JOIN Categories c ON m.category_id = c.category_id
         ORDER BY c.name, m.name;
     """)
     rows = cursor.fetchall()
     for row in rows:
-        menu_item = Menu(category=row[0], name=row[1], price=row[2])
+        menu_item = Menu(item_id=row[0], category=row[1], name=row[2], price=row[3])
         menu_items.append(menu_item)
     cursor.close()
     db.close()
@@ -60,7 +60,7 @@ def get_popular_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_
         JOIN Menu_Items m ON oi.item_id = m.item_id
         GROUP BY m.name
         ORDER BY total_quantity DESC
-        LIMIT 10;
+        LIMIT 5;
     """)
     rows = cursor.fetchall()
     for row in rows:
@@ -129,6 +129,11 @@ def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_c
     return regular_customers
 
 
+@app.get("/dashboard/", response_class=HTMLResponse)
+def dashboard(request: Request):
+    return templates.TemplateResponse(request=request, name="dashboard.html")
+
+
 @app.get("/", response_class=HTMLResponse)
 def main_page(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html", context={"data": [1]})
+    return templates.TemplateResponse(request=request, name="index.html")

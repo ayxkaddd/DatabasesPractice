@@ -3,61 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royal Coffe</title>
+    <title>Café Royal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .map {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .menu-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .menu-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            margin: 10px;
+            width: 200px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .menu-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .menu-item h3 {
+            margin: 10px 0;
+        }
+        .menu-item p {
+            color: #007BFF;
+            font-weight: bold;
+        }
+        .testimonials {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .testimonial {
+            margin-bottom: 20px;
+        }
+        .testimonial p {
+            font-style: italic;
+        }
+        .testimonial h4 {
+            margin: 10px 0 0;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-    <h1>Royal Coffe</h1>
-    <h1>Menu</h1>
-    <div id="menu"></div>
-
+    <header>
+        <h1>Welcome to Café Royal</h1>
+    </header>
+    <div class="container">
+        <section>
+            <h2>About Us</h2>
+            <p>Welcome to Café Royal, the perfect place to enjoy a cup of coffee and delicious desserts. Our cozy environment and friendly staff ensure you have a great experience every time you visit.</p>
+            <p>Founded in 2010, Café Royal has become a beloved spot for locals and visitors alike. We pride ourselves on serving high-quality coffee, freshly baked pastries, and a wide selection of beverages and desserts to satisfy all tastes.</p>
+        </section>
+        <section>
+            <h2>Our Story</h2>
+            <p>Café Royal was established with a simple mission: to create a welcoming space where people can come together over a cup of coffee. Our founders, John and Jane Doe, envisioned a place that felt like a home away from home, with a focus on quality, community, and sustainability.</p>
+            <p>Over the years, we've grown and evolved, but our commitment to these core values has never wavered. Today, we continue to source our coffee beans from the best farms around the world, and our skilled baristas take pride in crafting each cup with care.</p>
+        </section>
+        <section>
+            <h2>Our Services</h2>
+            <ul>
+                <li>Barista-crafted coffee and espresso drinks</li>
+                <li>Freshly baked pastries and desserts</li>
+                <li>Breakfast and lunch menu</li>
+                <li>Free Wi-Fi for all customers</li>
+                <li>Outdoor seating available</li>
+                <li>Catering services for events</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Our Menu</h2>
+            <div id="menu">
+            </div>
+        </section>
+        <section class="map">
+            <h2>Find Us Here</h2>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.373535951599!2d144.9630580158447!3d-37.81249937975151!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0x5045675218ced2b0!2sCafe%20Royal!5e0!3m2!1sen!2sus!4v1623103068024!5m2!1sen!2sus" width="400" height="250" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </section>
+        <section class="testimonials">
+            <h2>Customer Testimonials</h2>
+            <div class="testimonial">
+                <p>"Café Royal is my favorite place to relax and enjoy a cup of coffee. The staff are always friendly, and the desserts are to die for!"</p>
+                <h4>- Sarah J.</h4>
+            </div>
+            <div class="testimonial">
+                <p>"I love the cozy atmosphere at Café Royal. It's the perfect spot for meeting friends or getting some work done."</p>
+                <h4>- Michael K.</h4>
+            </div>
+            <div class="testimonial">
+                <p>"The coffee here is top-notch, and the baristas really know their stuff. Highly recommend!"</p>
+                <h4>- Emily R.</h4>
+            </div>
+        </section>
+    </div>
     <script>
-        async function fetchMenuItems() {
+        async function fetchData(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return await response.json();
+        }
+
+        function createMenuItemElement(item) {
+            const menuItemDiv = document.createElement('div');
+            menuItemDiv.className = 'menu-item';
+
+            const img = document.createElement('img');
+            img.src = `/static/images/${item.item_id}.jpg`;
+            img.alt = item.name;
+
+            const title = document.createElement('h3');
+            title.textContent = item.name;
+
+            const category = document.createElement('p');
+            category.textContent = item.category;
+
+            const price = document.createElement('p');
+            price.textContent = `${item.price} UAH`;
+
+            menuItemDiv.appendChild(img);
+            menuItemDiv.appendChild(title);
+            menuItemDiv.appendChild(category);
+            menuItemDiv.appendChild(price);
+
+            return menuItemDiv;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const response = await fetch('/api/menu_items/');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
+                const menuItems = await fetchData('/api/menu_items/');
+                const menuContainer = document.getElementById('menu');
+                const categories = {};
+
+                menuItems.forEach(item => {
+                    if (!categories[item.category]) {
+                        categories[item.category] = [];
+                    }
+                    categories[item.category].push(item);
+                });
+
+                for (const category in categories) {
+                    const categorySection = document.createElement('div');
+                    categorySection.className = 'menu-category';
+                    const categoryTitle = document.createElement('h2');
+                    categoryTitle.textContent = category;
+                    categorySection.appendChild(categoryTitle);
+
+                    const itemsContainer = document.createElement('div');
+                    itemsContainer.className = 'menu-items';
+
+                    categories[category].forEach(item => {
+                        const menuItemElement = createMenuItemElement(item);
+                        itemsContainer.appendChild(menuItemElement);
+                    });
+
+                    categorySection.appendChild(itemsContainer);
+                    menuContainer.appendChild(categorySection);
                 }
-                const menuItems = await response.json();
-                displayMenuItems(menuItems);
             } catch (error) {
                 console.error('Failed to fetch menu items:', error);
             }
-        }
-
-        function displayMenuItems(menuItems) {
-            const menuContainer = document.getElementById('menu');
-            menuContainer.innerHTML = '';
-
-            const categories = {};
-
-            // Group items by category
-            menuItems.forEach(item => {
-                if (!categories[item.category]) {
-                    categories[item.category] = [];
-                }
-                categories[item.category].push(item);
-            });
-
-            // Create HTML for each category
-            for (const category in categories) {
-                const categoryHeader = document.createElement('h2');
-                categoryHeader.textContent = category;
-                menuContainer.appendChild(categoryHeader);
-
-                const itemList = document.createElement('ul');
-
-                categories[category].forEach(item => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${item.name} - ${item.price} UAH`;
-                    itemList.appendChild(listItem);
-                });
-
-                menuContainer.appendChild(itemList);
-            }
-        }
-
-        // Fetch and display menu items when the page loads
-        document.addEventListener('DOMContentLoaded', fetchMenuItems);
+        });
     </script>
 </body>
 </html>

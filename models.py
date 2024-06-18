@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class Menu(BaseModel):
+    item_id: int
     category: str
     name: str
     price: int
@@ -26,6 +27,7 @@ class Regulars(BaseModel):
     last_name: str
     email: str
     orders_count: int
+
 
 class Customer(BaseModel):
     customer_id: int
