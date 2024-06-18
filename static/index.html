@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Coffe</title>
+</head>
+<body>
+    <h1>Royal Coffe</h1>
+    <h1>Menu</h1>
+    <div id="menu"></div>
+
+    <script>
+        async function fetchMenuItems() {
+            try {
+                const response = await fetch('/api/menu_items/');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const menuItems = await response.json();
+                displayMenuItems(menuItems);
+            } catch (error) {
+                console.error('Failed to fetch menu items:', error);
+            }
+        }
+
+        function displayMenuItems(menuItems) {
+            const menuContainer = document.getElementById('menu');
+            menuContainer.innerHTML = '';
+
+            const categories = {};
+
+            // Group items by category
+            menuItems.forEach(item => {
+                if (!categories[item.category]) {
+                    categories[item.category] = [];
+                }
+                categories[item.category].push(item);
+            });
+
+            // Create HTML for each category
+            for (const category in categories) {
+                const categoryHeader = document.createElement('h2');
+                categoryHeader.textContent = category;
+                menuContainer.appendChild(categoryHeader);
+
+                const itemList = document.createElement('ul');
+
+                categories[category].forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${item.name} - ${item.price} UAH`;
+                    itemList.appendChild(listItem);
+                });
+
+                menuContainer.appendChild(itemList);
+            }
+        }
+
+        // Fetch and display menu items when the page loads
+        document.addEventListener('DOMContentLoaded', fetchMenuItems);
+    </script>
+</body>
+</html>
