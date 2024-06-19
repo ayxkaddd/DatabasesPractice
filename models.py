@@ -1,8 +1,9 @@
+from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
 class Menu(BaseModel):
-    item_id: int
+    item_id: Optional[int] = None
     category: str
     name: str
     price: int
@@ -14,6 +15,11 @@ class OrderHistory(BaseModel):
     item: str
     quantity: int
     total_price: int
+
+
+class Category(BaseModel):
+    category_id: int
+    name: str
 
 
 class PopularMenuItems(BaseModel):
