@@ -5,6 +5,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from datetime import datetime
+
 import mysql.connector
 from mysql.connector import Error
 
@@ -94,7 +96,27 @@ def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connectio
     cursor.execute("SELECT * FROM Customers;")
     rows = cursor.fetchall()
     for row in rows:
-        customer = Customer(customer_id=row[0], first_name=row[1], last_name=row[2], email=row[3])
+        customer = Customer(customer_id=row[0], first_name=row[1], last_name=row[2])
+        customers.append(customer)
+    cursor.close()
+    db.close()
+    return customers
+
+
+@app.get("/api/customers/search/", response_model=List[Customer])
+def search_customers(search_query: str, db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
+    customers = []
+    cursor = db.cursor()
+    query = """
+        SELECT customer_id, first_name, last_name
+        FROM Customers
+        WHERE first_name LIKE %s OR last_name LIKE %s
+    """
+    like_term = f"%{search_query}%"
+    cursor.execute(query, (like_term, like_term))
+    rows = cursor.fetchall()
+    for row in rows:
+        customer = Customer(customer_id=row[0], first_name=row[1], last_name=row[2])
         customers.append(customer)
     cursor.close()
     db.close()
@@ -132,21 +154,52 @@ def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_c
     regular_customers = []
     cursor = db.cursor()
     cursor.execute("""
-        SELECT c.customer_id, c.first_name, c.last_name, c.email, COUNT(o.order_id) AS orders_count
+        SELECT c.customer_id, c.first_name, c.last_name, COUNT(o.order_id) AS orders_count
         FROM Customers c
         JOIN Orders o ON c.customer_id = o.customer_id
-        GROUP BY c.customer_id, c.first_name, c.last_name, c.email
+        GROUP BY c.customer_id, c.first_name, c.last_name
         HAVING COUNT(o.order_id) >= 5
         ORDER BY orders_count DESC;
     """)
     rows = cursor.fetchall()
     for row in rows:
-        regular_customer = Regulars(customer_id=row[0], first_name=row[1], last_name=row[2], email=row[3], orders_count=row[4])
+        regular_customer = Regulars(customer_id=row[0], first_name=row[1], last_name=row[2], orders_count=row[3])
         regular_customers.append(regular_customer)
     cursor.close()
     db.close()
     return regular_customers
 
+
+@app.post("/api/order_add/", status_code=201)
+def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
+    cursor = db.cursor()
+    customer_id = order.customer.customer_id
+    try:
+        if not customer_id:
+            cursor.execute("INSERT INTO Customers (first_name, last_name) VALUES (%s, %s)", (order.customer.first_name, order.customer.last_name))
+            db.commit()
+
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            customer_id = cursor.fetchone()[0]
+
+        order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute("INSERT INTO Orders (customer_id, order_date) VALUES (%s, %s)", (customer_id, order_date))
+        db.commit()
+
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        order_id = cursor.fetchone()[0]
+
+        for item in order.items:
+            cursor.execute("INSERT INTO Order_Items (order_id, item_id, quantity) VALUES (%s, %s, %s)", (order_id, item.item_id, item.quantity))
+            db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error adding new item: {str(e)}")
+    finally:
+        cursor.close()
+        db.close()
+
+    return {"message": "order was succesfully added"}
 
 
 @app.post("/api/add_new_item/", response_model=Menu)
@@ -209,3 +262,8 @@ def render_dashboard(request: Request):
 @app.get("/", response_class=HTMLResponse)
 def main_page(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+
+
+@app.get("/test/", response_class=HTMLResponse)
+def test_page(request: Request):
+    return templates.TemplateResponse(request=request, name="test.html")

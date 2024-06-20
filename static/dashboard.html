@@ -5,6 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     <title>Royal Admin Dashboard</title>
+    <style>
+        .menu-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .menu-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            margin: 10px;
+            width: 200px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+        }
+        .menu-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .menu-item h3 {
+            margin: 10px 0;
+        }
+        .menu-item p {
+            color: #007BFF;
+            font-weight: bold;
+        }
+        .selected-items {
+            margin-top: 20px;
+        }
+        .selected-item {
+            /* display: flex; */
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .payment-method-buttons {
+            display: flex;
+            /* margin-right: 10px; */
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .payment-method-button {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .payment-method-button img {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     <script defer src="{{ url_for('static', path='js/dashboard.js') }}"></script>
@@ -12,6 +62,7 @@
     <div class="nav">
         <a href="#" onclick="showSection('menu-items')">Menu Items</a>
         <a href="#" onclick="showSection('popular-menu-items')">Popular Menu Items</a>
+        <a href="#" onclick="showSection('add-new-order')">Add New Order</a>
         <a href="#" onclick="showSection('customers')">Customers</a>
         <a href="#" onclick="showSection('regular-customers')">Regular Customers</a>
     </div>
@@ -61,6 +112,46 @@
             </table>
         </div>
     </div>
+
+    <div class="container" id="add-new-order">
+        <div class="section">
+            <h2>Add New Order</h2>
+            <div class="form-container">
+                <form id="addOrderForm">
+                    <div id="menu-grid" class="menu-grid"></div>
+
+                    <label for="customer">Customer Name:</label>
+                    <input type="text" id="customer" name="customer" list="customers-list" required>
+                    <datalist id="customers-list"></datalist>
+
+                    <div class="selected-items">
+                        <h3>Selected Items</h3>
+                        <div id="selected-items-list"></div>
+                    </div>
+
+                    <div class="payment-method-buttons">
+                        <div id="cash-button" class="payment-method-button">
+                            <img src="/static/images/cash_icon.png" alt="Cash" width="32" height="32">
+                            <span>Cash</span>
+                        </div>
+                        <div id="credit-card-button" class="payment-method-button">
+                            <img src="/static/images/credit_card_icon.png" alt="Credit Card" width="32" height="32">
+                            <span>Credit Card</span>
+                        </div>
+                    </div>
+                    <h2>To Pay: <span id="totalAmount">0</span> UAH</h2>
+                    <div id="cash-details" style="display: none;">
+                        <label for="cash-given">Cash Given:</label>
+                        <input type="number" id="cash-given" name="cash_given" min="0" step="0.01">
+                        <p id="change"></p>
+                    </div>
+
+                    <button type="submit">Add Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="customers">
         <div class="section">
             <h2>Customers</h2>
@@ -70,7 +161,6 @@
                         <th>Customer ID</th>
                         <th>First Name</th>
                         <th>Last Name</th>
-                        <th>Email</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -102,7 +192,6 @@
                         <th>Customer ID</th>
                         <th>First Name</th>
                         <th>Last Name</th>
-                        <th>Email</th>
                         <th>Orders Count</th>
                     </tr>
                 </thead>
