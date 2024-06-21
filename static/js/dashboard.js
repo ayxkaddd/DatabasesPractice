@@ -203,6 +203,9 @@ function updateSelectedItemsList() {
         const itemName = document.createElement('span');
         itemName.textContent = `${item.name} (x${item.quantity})`;
 
+        const quantityAdjust = document.createElement('div');
+        quantityAdjust.className = 'quantity-adjust';
+
         const increaseButton = document.createElement('button');
         increaseButton.textContent = '+';
         increaseButton.addEventListener('click', () => {
@@ -222,9 +225,11 @@ function updateSelectedItemsList() {
             updateTotalAmount();
         });
 
+        quantityAdjust.appendChild(decreaseButton);
+        quantityAdjust.appendChild(increaseButton);
+
         itemDiv.appendChild(itemName);
-        itemDiv.appendChild(increaseButton);
-        itemDiv.appendChild(decreaseButton);
+        itemDiv.appendChild(quantityAdjust);
 
         selectedItemsList.appendChild(itemDiv);
     });
@@ -319,6 +324,7 @@ async function submitOrder(event) {
 document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
 
 document.addEventListener('DOMContentLoaded', async () => {
+    showSection('menu-items');
     try {
         const categorySelect = document.getElementById('category');
         const categories = await fetchData("/api/categories/");
@@ -348,8 +354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const menuItemElement = createMenuItemElement(item);
             menuGrid.appendChild(menuItemElement);
         });
-
-        showSection('menu-items');
 
     } catch (error) {
         console.error('Failed to fetch data:', error);

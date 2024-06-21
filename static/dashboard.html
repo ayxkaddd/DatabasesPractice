@@ -3,60 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style_test.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     <title>Royal Admin Dashboard</title>
     <style>
         .menu-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            margin-bottom: 20px;
         }
+
         .menu-item {
             background-color: white;
             border: 1px solid #ddd;
             margin: 10px;
-            width: 200px;
+            width: 150px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             text-align: center;
             cursor: pointer;
+            transition: transform 0.2s;
         }
+
+        .menu-item:hover {
+            transform: scale(1.05);
+        }
+
         .menu-item img {
             width: 100%;
-            height: 150px;
+            height: 100px;
             object-fit: cover;
         }
+
         .menu-item h3 {
             margin: 10px 0;
+            font-size: 16px;
         }
+
         .menu-item p {
             color: #007BFF;
             font-weight: bold;
+            margin: 5px 0;
         }
-        .selected-items {
-            margin-top: 20px;
+
+        .payment-method-buttons {
+            display: flex;
+            justify-content: flex-start; /* Align to the left */
+            gap: 20px;
+            margin: 20px 0;
         }
+
+        .payment-method-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            width: 80px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
         .selected-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .quantity-adjust {
+            display: flex;
+            gap: 5px;
+        }
+
+        .quantity-adjust button {
+            padding: 2px 8px;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .payment-method-button:hover {
+            background-color: #e9e9e9;
+            transform: scale(1.05);
+        }
+
+        .payment-method-button img {
+            margin-bottom: 5px;
+        }
+
+        .payment-method-button h2 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        #totalAmount {
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        #cash-details {
+            margin: 20px 0;
+        }
+
+        .selected-items {
+            margin-top: 20px;
+        }
+
+        .selected-items h3 {
             margin-bottom: 10px;
         }
-        .payment-method-buttons {
+
+        .selected-item {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            /* margin-right: 10px; */
-            justify-content: space-around;
-            /* margin-top: 20px; */
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
         }
-        .payment-method-button {
-            width: 20px;
-            text-align: center;
-            align-items: center;
+
+        .selected-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
             cursor: pointer;
+        }
+
+        .selected-item button:hover {
+            background-color: #0056b3;
+        }
+
+        button[type="submit"] {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <script defer src="{{ url_for('static', path='js/dashboard.js') }}"></script>
-    <h1>Admin Dashboard</h1>
     <div class="nav">
         <a href="#" onclick="showSection('menu-items')">Menu Items</a>
         <a href="#" onclick="showSection('popular-menu-items')">Popular Menu Items</a>
@@ -144,12 +254,15 @@
                             <img src="/static/images/cash_icon.png" alt="Cash" width="32" height="32">
                             <h2>Cash</h2>
                         </div>
+                        <br>
                         <div id="credit-card-button" class="payment-method-button">
                             <img src="/static/images/credit_card_icon.png" alt="Credit Card" width="32" height="32">
-                            <h2>Credit Card</h2>
+                            <h2>Card</h2>
                         </div>
                     </div>
+
                     <h2>To Pay: <span id="totalAmount">0</span> UAH</h2>
+
                     <div id="cash-details" style="display: none;">
                         <label for="cash-given">Cash Given:</label>
                         <input type="number" id="cash-given" name="cash_given" min="0" step="0.01">
@@ -157,7 +270,7 @@
                     </div>
 
                     <div class="selected-items">
-                        <h3>Selected Items</h3>
+                        <h2>Selected Items</h2>
                         <div id="selected-items-list"></div>
                     </div>
 
