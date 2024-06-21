@@ -6,17 +6,17 @@ class Menu(BaseModel):
     item_id: Optional[int] = None
     category: str
     name: str
-    price: int
+    price: float
 
 class OrderHistory(BaseModel):
     order_id: int
     order_date: datetime
     item: str
     quantity: int
-    total_price: int
+    total_price: float
 
 class Category(BaseModel):
-    category_id: int
+    category_id: Optional[int] = None
     name: str
 
 class PopularMenuItems(BaseModel):
@@ -41,5 +41,5 @@ class OrderItem(BaseModel):
 class Order(BaseModel):
     customer: Customer
     payment_method: str
-    total_money: int
+    total_money: float
     items: List[OrderItem]

@@ -39,10 +39,16 @@ def get_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connecti
     menu_items = []
     cursor = db.cursor()
     cursor.execute("""
-        SELECT m.item_id, c.name AS category, m.name AS item, m.price
-        FROM Menu_Items m
-        JOIN Categories c ON m.category_id = c.category_id
-        ORDER BY c.name, m.name;
+    SELECT
+        m.item_id,
+        c.name AS category,
+        m.name AS item,
+        m.price
+    FROM
+        Menu_Items m
+    JOIN Categories c ON
+        m.category_id = c.category_id
+    ORDER BY `m`.`item_id` ASC
     """)
     rows = cursor.fetchall()
     for row in rows:
@@ -202,23 +208,25 @@ def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(ge
     return {"message": "order was succesfully added"}
 
 
-@app.post("/api/add_new_item/", response_model=Menu)
-def add_new_item(category: str = Form(...), name: str = Form(...), price: int = Form(...)):
-    db = get_db_connection()
+@app.post("/api/add_new_item/", response_model=List[Menu])
+def add_new_item(items: List[Menu], db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
+    added_items = []
     cursor = db.cursor()
     try:
-        cursor.execute("SELECT category_id FROM Categories WHERE name = %s", (category,))
-        category_id = cursor.fetchone()
-        if not category_id:
-            raise HTTPException(status_code=400, detail="Invalid category.")
+        for item in items:
+            cursor.execute("SELECT category_id FROM Categories WHERE name = %s", (item.category,))
+            category_id = cursor.fetchone()[0]
+            if not category_id:
+                raise HTTPException(status_code=400, detail="Invalid category.")
 
-        cursor.execute("INSERT INTO Menu_Items (name, price, category_id) VALUES (%s, %s, %s)",
-                       (name, price, category_id[0]))
-        db.commit()
+            cursor.execute("INSERT INTO Menu_Items (name, price, category_id) VALUES (%s, %s, %s)",
+                        (item.name, item.price, category_id))
+            db.commit()
 
-        cursor.execute("SELECT LAST_INSERT_ID()")
-        item_id = cursor.fetchone()[0]
-
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            item_id = cursor.fetchone()[0]
+            added_item = Menu(item_id=item_id, category=item.category, name=item.name, price=item.price)
+            added_items.append(added_item)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error adding new item: {str(e)}")
@@ -226,7 +234,27 @@ def add_new_item(category: str = Form(...), name: str = Form(...), price: int = 
         cursor.close()
         db.close()
 
-    return Menu(item_id=item_id, category=category, name=name, price=price)
+    return added_items
+
+
+@app.post("/api/categories/", response_model=Category)
+def get_categories(category: Category, db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
+    cursor = db.cursor()
+    try:
+        cursor.execute("INSERT INTO Categories (name) VALUE (%s)",
+                       [category.name])
+        db.commit()
+
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        category_id = cursor.fetchone()[0]
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error adding new category: {str(e)}")
+    finally:
+        cursor.close()
+        db.close()
+
+    return Category(category_id=category_id, name=category.name)
 
 
 @app.post("/api/upload_image/")

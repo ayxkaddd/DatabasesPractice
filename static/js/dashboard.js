@@ -1,3 +1,6 @@
+let previewItems = [];
+let selectedItems = [];
+
 async function fetchData(url) {
     const response = await fetch(url);
     if (!response.ok) {
@@ -6,50 +9,107 @@ async function fetchData(url) {
     return await response.json();
 }
 
-async function submitForm(event) {
+async function submitCategoryForm(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
-    const category = formData.get('category');
-    const name = formData.get('name');
-    const price = formData.get('price');
-    const imageFile = formData.get('image');
+    const category_name = formData.get('category_name');
+    console.log(category_name)
 
     try {
-        const addItemResponse = await fetch('/api/add_new_item/', {
-            method: 'POST',
-            body: new URLSearchParams({
-                'category': category,
-                'name': name,
-                'price': price
-            })
-        });
-
-        if (!addItemResponse.ok) {
-            throw new Error('Failed to add new item');
+        const category_req = {
+            'name': category_name
         }
 
-        const newItem = await addItemResponse.json();
-
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', imageFile);
-
-        const uploadResponse = await fetch(`/api/upload_image/?item_id=${newItem.item_id}`, {
+        const addCategoryResponse = await fetch('/api/categories/', {
             method: 'POST',
-            body: uploadFormData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(category_req)
         });
 
-        if (!uploadResponse.ok) {
-            throw new Error('Failed to upload image');
+        console.log(addCategoryResponse);
+
+        if (!addCategoryResponse.ok) {
+            throw new Error('Failed to add new category');
         }
 
         window.location.reload();
-
     } catch (error) {
         console.error('Error adding new item:', error);
     }
 }
 
+
+function removeItem(index) {
+    previewItems.splice(index, 1);
+    updatePreviewItemsGrid();
+}
+
+
+function updatePreviewItemsGrid() {
+    const previewItemsGrid = document.getElementById('preview-items-grid');
+    previewItemsGrid.innerHTML = '';
+    previewItems.forEach((item, index) => {
+        const menuItemDiv = document.createElement('div');
+        menuItemDiv.className = 'menu-item';
+
+        const img = document.createElement('img');
+        img.src = item.imageSrc;
+        img.alt = item.name;
+
+        const title = document.createElement('h3');
+        title.textContent = item.name;
+
+        const category = document.createElement('p');
+        category.textContent = item.category;
+
+        const price = document.createElement('p');
+        price.textContent = `${item.price} UAH`;
+
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-button';
+        removeButton.textContent = 'X';
+        removeButton.onclick = () => removeItem(index);
+
+        menuItemDiv.appendChild(img);
+        menuItemDiv.appendChild(title);
+        menuItemDiv.appendChild(category);
+        menuItemDiv.appendChild(price);
+        menuItemDiv.appendChild(removeButton);
+
+        previewItemsGrid.appendChild(menuItemDiv);
+    });
+}
+
+function addItem() {
+    const category = document.getElementById('category').value;
+    const name = document.getElementById('name').value;
+    const price = document.getElementById('price').value;
+    const imageInput = document.getElementById('image');
+    const image = imageInput.files[0];
+
+    if (category && name && price && image) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const item = {
+                category: category,
+                name: name,
+                price: price,
+                imageSrc: e.target.result,
+                imageFile: image
+            };
+            previewItems.push(item);
+            updatePreviewItemsGrid();
+        };
+        reader.readAsDataURL(image);
+
+        document.getElementById('addItemForm').reset();
+    } else {
+        alert('Please fill all fields.');
+    }
+}
 
 async function populateTable(data, tableBodyId, extraColumn = false) {
     const tableBody = document.getElementById(tableBodyId);
@@ -118,8 +178,6 @@ function createMenuItemElement(item) {
 
     return menuItemDiv;
 }
-
-let selectedItems = [];
 
 function addItemToOrder(item) {
     const existingItem = selectedItems.find(i => i.item_id === item.item_id);
@@ -228,8 +286,6 @@ async function submitOrder(event) {
     const lastName = customerInput[1];
     const customerId = customerInput[2] || null;
 
-    console.log(firstName, lastName, customerId)
-
     const paymentMethod = document.getElementById('cash-details').style.display === 'none' ? 'credit_card' : 'cash';
     const cashGiven = paymentMethod === 'cash' ? parseFloat(document.getElementById('cash-given').value) : 0;
     const totalMoney = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -273,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             categorySelect.appendChild(option);
         });
 
-        document.getElementById('addItemForm').addEventListener('submit', submitForm);
+        document.getElementById('addCategoryForm').addEventListener('submit', submitCategoryForm);
 
         const menuItems = await fetchData('/api/menu_items/');
         await populateTable(menuItems, 'menu-items-body');

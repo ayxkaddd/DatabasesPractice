@@ -64,3 +64,64 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+
+header {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.map {
+    text-align: center;
+    margin: 20px 0;
+}
+.menu-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.menu-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    margin: 10px;
+    width: 200px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.menu-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+.menu-item h3 {
+    margin: 10px 0;
+}
+.menu-item p {
+    color: #007BFF;
+    font-weight: bold;
+}
+.menu-item .remove-button {
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+.testimonials {
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin: 20px 0;
+}
+.testimonial {
+    margin-bottom: 20px;
+}
+.testimonial p {
+    font-style: italic;
+}
+.testimonial h4 {
+    margin: 10px 0 0;
+    text-align: right;
+}
