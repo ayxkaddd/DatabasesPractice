@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}"> -->
     <title>Café Royal</title>
     <style>
         body {
@@ -142,15 +141,11 @@
             const title = document.createElement('h3');
             title.textContent = item.name;
 
-            const category = document.createElement('p');
-            category.textContent = item.category;
-
             const price = document.createElement('p');
             price.textContent = `${item.price} UAH`;
 
             menuItemDiv.appendChild(img);
             menuItemDiv.appendChild(title);
-            menuItemDiv.appendChild(category);
             menuItemDiv.appendChild(price);
 
             return menuItemDiv;

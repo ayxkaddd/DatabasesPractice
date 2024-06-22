@@ -105,7 +105,7 @@ def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connectio
     return fetch_and_map(db, query, Customer)
 
 
-@app.get("/api/customers/search/", response_model=List[Customer])
+@app.get("/api/customers/{search_query}/", response_model=List[Customer])
 def search_customers(search_query: str, db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
     query = """
         SELECT customer_id, first_name, last_name
@@ -149,11 +149,10 @@ def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_c
 @app.post("/api/order_add/", status_code=201)
 def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
     try:
-        if not order.customer.customer_id:
+        customer_id = order.customer.customer_id
+        if not customer_id:
             query = "INSERT INTO Customers (first_name, last_name) VALUES (%s, %s)"
             customer_id = execute_insert(db, query, (order.customer.first_name, order.customer.last_name))
-        else:
-            customer_id = order.customer.customer_id
 
         order_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         query = "INSERT INTO Orders (customer_id, order_date) VALUES (%s, %s)"

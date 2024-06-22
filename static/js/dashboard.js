@@ -285,7 +285,7 @@ async function handleCustomerInput(event) {
     customersList.innerHTML = '';
 
     if (searchTerm.length > 2) {
-        const customers = await fetchData(`/api/customers/search/?search_query=${searchTerm}`);
+        const customers = await fetchData(`/api/customers/${searchTerm}/`);
         customers.forEach(customer => {
             console.log(customer)
             const option = document.createElement('option');
