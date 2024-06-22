@@ -43,3 +43,14 @@ class Order(BaseModel):
     payment_method: str
     total_money: float
     items: List[OrderItem]
+
+class ReportSummary(BaseModel):
+    period: str
+    start_date: datetime
+    end_date: datetime
+    total_orders: int
+    unique_customers: int
+    total_revenue: float
+    average_order_value: float
+    top_selling_item: str
+    top_selling_item_quantity: int

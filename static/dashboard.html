@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     <title>Royal Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
     <style>
         .menu-grid {
             display: flex;
@@ -179,6 +181,7 @@
         <a href="#" onclick="showSection('add-new-order')">Add New Order</a>
         <a href="#" onclick="showSection('customers')">Customers</a>
         <a href="#" onclick="showSection('regular-customers')">Regular Customers</a>
+        <a href="#" onclick="showSection('chart')">Graph</a>
     </div>
     <div class="container" id="menu-items">
         <div class="section">
@@ -334,5 +337,12 @@
             </table>
         </div>
     </div>
+    <div class="container" id="chart">
+        <div class="section">
+            <h1>Graph</h1>
+            <canvas id="orderChart"></canvas>
+        </div>
+    </div>
+    <script src="/static/js/graphs.js"></script>
 </body>
 </html>
