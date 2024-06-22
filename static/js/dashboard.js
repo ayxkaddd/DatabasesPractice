@@ -83,6 +83,42 @@ function updatePreviewItemsGrid() {
     });
 }
 
+async function submitAllItems() {
+    const itemsToSubmit = previewItems.map(item => ({
+        category: item.category,
+        name: item.name,
+        price: item.price
+    }));
+
+    const response = await fetch('/api/add_new_item/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(itemsToSubmit)
+    });
+
+    const result = await response.json();
+    if (result && result.length > 0) {
+        for (const item of result) {
+            const imageFile = previewItems.find(i => i.name === item.name).imageFile;
+            const formData = new FormData();
+            formData.append('file', imageFile);
+
+            await fetch(`/api/upload_image/?item_id=${item.item_id}`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+        alert('All items have been added successfully.');
+        previewItems = [];
+        updatePreviewItemsGrid();
+    } else {
+        alert('Failed to submit items.');
+    }
+}
+
+
 function addItem() {
     const category = document.getElementById('category').value;
     const name = document.getElementById('name').value;
@@ -212,6 +248,7 @@ function updateSelectedItemsList() {
             item.quantity++;
             updateSelectedItemsList();
             updateTotalAmount();
+            calculateChange();
         });
 
         const decreaseButton = document.createElement('button');
@@ -223,10 +260,11 @@ function updateSelectedItemsList() {
             }
             updateSelectedItemsList();
             updateTotalAmount();
+            calculateChange();
         });
 
-        quantityAdjust.appendChild(decreaseButton);
         quantityAdjust.appendChild(increaseButton);
+        quantityAdjust.appendChild(decreaseButton);
 
         itemDiv.appendChild(itemName);
         itemDiv.appendChild(quantityAdjust);
@@ -279,7 +317,7 @@ function calculateChange() {
     const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const cashGiven = parseFloat(document.getElementById('cash-given').value);
     const change = cashGiven - totalAmount;
-    document.getElementById('change').textContent = `Change: ${change.toFixed(2)} UAH`;
+    document.getElementById('change').textContent = `${change.toFixed(2)}`;
 }
 
 
@@ -320,6 +358,13 @@ async function submitOrder(event) {
         console.error('Error adding order:', error);
     }
 }
+
+function updateFileName(input) {
+    const fileName = input.files[0]?.name;
+    const fileNameDisplay = input.parentElement.querySelector('.file-name');
+    fileNameDisplay.textContent = fileName || '';
+}
+
 
 document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
 

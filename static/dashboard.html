@@ -66,6 +66,7 @@
 
         .selected-item {
             display: flex;
+            width: 350px;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
@@ -100,6 +101,11 @@
         }
 
         #totalAmount {
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        #change {
             color: #007BFF;
             font-weight: bold;
         }
@@ -211,15 +217,16 @@
                     <label for="price">Price (UAH):</label>
                     <input type="number" id="price" name="price" required>
 
-                    <label for="image">Image:</label>
-                    <input type="file" id="image" name="image" accept="image/*" required>
+                    <div class="file-input-container">
+                        <input type="file" id="image" name="image" accept="image/*" onchange="updateFileName(this)">
+                        <label for="image" class="file-input-label">Choose Image</label>
+                        <span class="file-name"></span>
+                    </div>
 
                     <button type="button" onclick="addItem()">Add Item</button>
                 </form>
             </div>
-            <div id="preview-items-grid" class="menu-items">
-                <!-- Preview items will be shown here -->
-            </div>
+            <div id="preview-items-grid" class="menu-items"></div>
             <button type="button" onclick="submitAllItems()">Submit All Items</button>
         </div>
     </div>
@@ -264,9 +271,9 @@
                     <h2>To Pay: <span id="totalAmount">0</span> UAH</h2>
 
                     <div id="cash-details" style="display: none;">
+                        <h2>Change: <snap id="change">0</snap> UAH</h2>
                         <label for="cash-given">Cash Given:</label>
                         <input type="number" id="cash-given" name="cash_given" min="0" step="0.01">
-                        <p id="change"></p>
                     </div>
 
                     <div class="selected-items">

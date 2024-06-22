@@ -203,3 +203,41 @@ select:disabled {
 option {
     padding: 10px;
 }
+
+input[type="file"] {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+/* Style the label to look like a button */
+.file-input-label {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-input-label:hover {
+    background-color: #0056b3;
+}
+
+/* Style for the file name display */
+.file-name {
+    margin-left: 10px;
+    font-style: italic;
+}
+
+/* Container for the file input and name display */
+.file-input-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
