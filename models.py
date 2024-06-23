@@ -55,6 +55,12 @@ class ReportSummary(BaseModel):
     top_selling_item: str
     top_selling_item_quantity: int
 
+class Employee(BaseModel):
+    employee_id: Optional[int] = None
+    first_name: str
+    last_name: str
+    employee_code: Optional[int] = None
+    password: Optional[str] = None
 
 class AuthDetails(BaseModel):
     employee_code: int

@@ -1,6 +1,7 @@
 import os
+import random
 from typing import List
-from fastapi import FastAPI, Depends, Form, HTTPException, Request, File, UploadFile
+from fastapi import FastAPI, Depends, Form, HTTPException, Header, Request, File, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -92,6 +93,42 @@ def login(auth_details: AuthDetails, db: mysql.connector.MySQLConnection = Depen
     return {'token': token}
 
 
+@app.get("/api/employees/", response_model=List[Employee])
+def get_employees(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+    query = "SELECT * FROM Employees;"
+    return fetch_and_map(db, query, Employee)
+
+
+@app.post('/api/employees/', status_code=201)
+def create_employee(employee: Employee, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+    if not employee.password:
+        raise HTTPException(status_code=400, detail="Password is required")
+
+    while True:
+        employee_code = random.randint(1000, 9999)
+        query = "SELECT COUNT(*) FROM Employees WHERE employee_code = %s"
+        result = execute_query(db, query, (employee_code,))
+        if result[0][0] == 0:
+            break
+
+    hashed_password = auth_handler.get_password_hash(employee.password)
+
+    try:
+        employee_query = """
+        INSERT INTO Employees (first_name, last_name, employee_code)
+        VALUES (%s, %s, %s)
+        """
+        employee_id = execute_insert(db, employee_query, (employee.first_name, employee.last_name, employee_code))
+
+        credentials_query = """
+        INSERT INTO Credentials (employee_id, password)
+        VALUES (%s, %s)
+        """
+        execute_insert(db, credentials_query, (employee_id, hashed_password))
+    except Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
 @app.get("/api/menu_items/", response_model=List[Menu])
 def get_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
     query = """
@@ -123,7 +160,7 @@ def get_categories(db: mysql.connector.MySQLConnection = Depends(get_db_connecti
 
 
 @app.get("/api/customers/", response_model=List[Customer])
-def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection)):
+def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM Customers;"
     return fetch_and_map(db, query, Customer)
 
@@ -345,21 +382,21 @@ def get_reports(period: str = "day", start_date: Optional[datetime] = None, end_
     return summaries
 
 
-@app.get("/dashboard/", response_class=HTMLResponse)
-def render_dashboard(request: Request):
-    return templates.TemplateResponse(request=request, name=f"dashboard.html")
-
-
 @app.get("/", response_class=HTMLResponse)
 def main_page(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
 
-@app.get("/test/", response_class=HTMLResponse)
-def test_page(request: Request):
-    return templates.TemplateResponse(request=request, name="test.html")
-
-
 @app.get("/login/", response_class=HTMLResponse)
 def login(request: Request):
     return templates.TemplateResponse(request=request, name="login.html")
+
+
+@app.get("/dashboard/", response_class=HTMLResponse)
+def render_dashboard(request: Request):
+    return templates.TemplateResponse(request=request, name="dashboard.html")
+
+
+@app.get("/test/", response_class=HTMLResponse)
+def test_page(request: Request):
+    return templates.TemplateResponse(request=request, name="test.html")

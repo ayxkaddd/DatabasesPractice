@@ -14,7 +14,7 @@ async function fetchData(url) {
         }
     });
     if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
+        window.location.href = '/login/';
     }
     return await response.json();
 }
@@ -180,6 +180,7 @@ async function populateTable(data, tableBodyId, extraColumn = false) {
             actionCell.appendChild(button);
             row.appendChild(actionCell);
         }
+        console.log(row);
         tableBody.appendChild(row);
     });
 }
@@ -381,6 +382,50 @@ function updateFileName(input) {
     fileNameDisplay.textContent = fileName || '';
 }
 
+function GenerateRandomPwd() {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    let password = "";
+    for (let i = 0, n = charset.length; i < length; ++i) {
+        password += charset.charAt(Math.floor(Math.random() * n));
+    }
+    document.getElementById('password').value = password;
+}
+
+
+async function SubmitEmployeeForm() {
+    const firstName = document.getElementById('first_name').value;
+    const lastName = document.getElementById('last_name').value;
+    const password = document.getElementById('password').value;
+
+    const employee = {
+        first_name: firstName,
+        last_name: lastName,
+        password: password
+    };
+
+    try {
+        const response = await fetch('/api/employees/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': GetTokenHeader(),
+            },
+            body: JSON.stringify(employee)
+        });
+
+        if (response.ok) {
+            alert('Employee added successfully!');
+            document.getElementById('addItemForm').reset(); // Reset form after successful submission
+        } else {
+            const errorData = await response.json();
+            alert('Failed to add employee: ' + errorData.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the form.');
+    }
+}
 
 document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
 
@@ -409,6 +454,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const regularCustomers = await fetchData('/api/regular_customers/');
         await populateTable(regularCustomers, 'regular-customers-body');
+
+        const employees = await fetchData('/api/employees/');
+        await populateTable(employees, 'employees-body');
 
         const menuGrid = document.getElementById('menu-grid');
         menuItems.forEach(item => {

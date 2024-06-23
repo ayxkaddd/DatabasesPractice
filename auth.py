@@ -4,11 +4,12 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
+from config import jwt_secret
 
 class AuthHandler():
     security = HTTPBearer()
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    secret = 'SECRET'
+    secret = jwt_secret
 
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
@@ -18,7 +19,7 @@ class AuthHandler():
 
     def encode_token(self, user_id):
         payload = {
-            'exp': datetime.utcnow() + timedelta(days=0, minutes=5),
+            'exp': datetime.utcnow() + timedelta(days=0, minutes=30),
             'iat': datetime.utcnow(),
             'sub': user_id
         }
