@@ -1,8 +1,18 @@
 let previewItems = [];
 let selectedItems = [];
 
+function GetTokenHeader() {
+	token = localStorage.getItem("token");
+    return `Bearer ${token}`
+}
+
 async function fetchData(url) {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            "Authorization": GetTokenHeader(),
+        }
+    });
     if (!response.ok) {
         throw new Error('Network response was not ok ' + response.statusText);
     }
@@ -24,7 +34,8 @@ async function submitCategoryForm(event) {
         const addCategoryResponse = await fetch('/api/categories/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': GetTokenHeader(),
             },
             body: JSON.stringify(category_req)
         });
@@ -87,13 +98,14 @@ async function submitAllItems() {
     const itemsToSubmit = previewItems.map(item => ({
         category: item.category,
         name: item.name,
-        price: item.price
+        price: parseInt(item.price)
     }));
 
     const response = await fetch('/api/add_new_item/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': GetTokenHeader(),
         },
         body: JSON.stringify(itemsToSubmit)
     });
@@ -107,6 +119,9 @@ async function submitAllItems() {
 
             await fetch(`/api/upload_image/?item_id=${item.item_id}`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': GetTokenHeader(),
+                },
                 body: formData
             });
         }
@@ -348,7 +363,8 @@ async function submitOrder(event) {
         const response = await fetch('/api/order_add/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': GetTokenHeader(),
             },
             body: JSON.stringify(order)
         });

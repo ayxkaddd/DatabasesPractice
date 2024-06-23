@@ -54,3 +54,8 @@ class ReportSummary(BaseModel):
     average_order_value: float
     top_selling_item: str
     top_selling_item_quantity: int
+
+
+class AuthDetails(BaseModel):
+    employee_code: int
+    password: str

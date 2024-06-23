@@ -3,7 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let orderChart;
 
     async function fetchData() {
-        const response = await fetch(`/api/reports/?period=day&start_date=2024-06-01&end_date=2024-06-30`);
+        const response = await fetch(`/api/reports/?period=day&start_date=2024-06-01&end_date=2024-06-30`,{
+            method: 'GET',
+            headers: {
+                'Authorization': GetTokenHeader(),
+            }
+        });
         const data = await response.json();
         return data;
     }
