@@ -94,13 +94,13 @@ def login(auth_details: AuthDetails, db: mysql.connector.MySQLConnection = Depen
 
 
 @app.get("/api/employees/", response_model=List[Employee])
-def get_employees(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_employees(db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM Employees;"
     return fetch_and_map(db, query, Employee)
 
 
 @app.post('/api/employees/', status_code=201)
-def create_employee(employee: Employee, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def create_employee(employee: Employee, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     if not employee.password:
         raise HTTPException(status_code=400, detail="Password is required")
 
@@ -140,8 +140,37 @@ def get_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connecti
     return fetch_and_map(db, query, Menu)
 
 
+@app.post("/api/menu_items/")
+async def update_menu_items(
+    items: List[Menu], db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
+    cursor = db.cursor()
+    try:
+        for item in items:
+            cursor.execute("SELECT category_id FROM Categories WHERE name = %s", (item.category,))
+            category_result = cursor.fetchone()
+            if not category_result:
+                raise HTTPException(status_code=400, detail=f"Category '{item.category}' not found")
+            category_id = category_result[0]
+
+            update_query = """
+            UPDATE Menu_Items
+            SET category_id = %s, name = %s, price = %s
+            WHERE item_id = %s
+            """
+            cursor.execute(update_query, (category_id, item.name, item.price, item.item_id))
+
+        db.commit()
+        return {"message": f"Successfully updated {len(items)} menu items"}
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(err)}")
+    finally:
+        cursor.close()
+
+
 @app.get("/api/popular_menu_items/", response_model=List[PopularMenuItems])
-def get_popular_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_popular_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT m.name AS item, SUM(oi.quantity) AS total_quantity
         FROM Order_Items oi
@@ -154,19 +183,19 @@ def get_popular_menu_items(db: mysql.connector.MySQLConnection = Depends(get_db_
 
 
 @app.get("/api/categories/", response_model=List[Category])
-def get_categories(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_categories(db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "SELECT category_id, name FROM Categories;"
     return fetch_and_map(db, query, Category)
 
 
 @app.get("/api/customers/", response_model=List[Customer])
-def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM Customers;"
     return fetch_and_map(db, query, Customer)
 
 
 @app.get("/api/customers/{search_query}/", response_model=List[Customer])
-def search_customers(search_query: str, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def search_customers(search_query: str, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT customer_id, first_name, last_name
         FROM Customers
@@ -177,7 +206,7 @@ def search_customers(search_query: str, db: mysql.connector.MySQLConnection = De
 
 
 @app.get("/api/order_history/{client_id}", response_model=List[OrderHistory])
-def get_order_history(client_id: int, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_order_history(client_id: int, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT o.order_id, o.order_date,
                GROUP_CONCAT(m.name ORDER BY m.name SEPARATOR ', ') AS item,
@@ -194,7 +223,7 @@ def get_order_history(client_id: int, db: mysql.connector.MySQLConnection = Depe
 
 
 @app.get("/api/regular_customers/", response_model=List[Regulars])
-def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT c.customer_id, c.first_name, c.last_name, COUNT(o.order_id) AS orders_count
         FROM Customers c
@@ -207,7 +236,7 @@ def get_regular_customers(db: mysql.connector.MySQLConnection = Depends(get_db_c
 
 
 @app.post("/api/order_add/", status_code=201)
-def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     try:
         customer_id = order.customer.customer_id
         if not customer_id:
@@ -228,7 +257,7 @@ def add_new_order(order: Order, db: mysql.connector.MySQLConnection = Depends(ge
 
 
 @app.post("/api/add_new_item/", response_model=List[Menu])
-def add_new_item(items: List[Menu], db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def add_new_item(items: List[Menu], db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     added_items = []
     try:
         for item in items:
@@ -248,14 +277,14 @@ def add_new_item(items: List[Menu], db: mysql.connector.MySQLConnection = Depend
 
 
 @app.post("/api/categories/", response_model=Category)
-def add_category(category: Category, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def add_category(category: Category, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "INSERT INTO Categories (name) VALUES (%s)"
     category_id = execute_insert(db, query, (category.name,))
     return Category(category_id=category_id, name=category.name)
 
 
 @app.post("/api/upload_image/")
-async def upload_image(item_id: int, file: UploadFile = File(...), token=Depends(auth_handler.auth_wrapper)):
+async def upload_image(item_id: int, file: UploadFile = File(...), _=Depends(auth_handler.auth_wrapper)):
     allowed_extensions = {"jpg", "jpeg", "png"}
     file_extension = file.filename.split(".")[-1].lower()
     if file_extension not in allowed_extensions:
@@ -279,7 +308,7 @@ async def upload_image(item_id: int, file: UploadFile = File(...), token=Depends
 
 
 @app.get("/api/reports/", response_model=List[ReportSummary])
-def get_reports(period: str = "day", start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, db: mysql.connector.MySQLConnection = Depends(get_db_connection), token=Depends(auth_handler.auth_wrapper)):
+def get_reports(period: str = "day", start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, db: mysql.connector.MySQLConnection = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     if period not in ["day", "week", "month"]:
         raise HTTPException(status_code=400, detail="Invalid period. Must be 'day', 'week', or 'month'.")
 

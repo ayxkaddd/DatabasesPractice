@@ -1,5 +1,6 @@
 let previewItems = [];
 let selectedItems = [];
+let editedItems = new Set();
 
 function GetTokenHeader() {
 	token = localStorage.getItem("token");
@@ -24,7 +25,6 @@ async function submitCategoryForm(event) {
     const form = event.target;
     const formData = new FormData(form);
     const category_name = formData.get('category_name');
-    console.log(category_name)
 
     try {
         const category_req = {
@@ -39,8 +39,6 @@ async function submitCategoryForm(event) {
             },
             body: JSON.stringify(category_req)
         });
-
-        console.log(addCategoryResponse);
 
         if (!addCategoryResponse.ok) {
             throw new Error('Failed to add new category');
@@ -162,25 +160,32 @@ function addItem() {
     }
 }
 
-async function populateTable(data, tableBodyId, extraColumn = false) {
+async function populateTable(data, tableBodyId, actions = []) {
     const tableBody = document.getElementById(tableBodyId);
     tableBody.innerHTML = '';
     data.forEach(item => {
         const row = document.createElement('tr');
+        row.dataset.itemId = item.item_id;
         Object.keys(item).forEach(key => {
             const cell = document.createElement('td');
             cell.textContent = item[key];
+            if (item[key] === null){
+                cell.textContent = "hidden"
+            }
             row.appendChild(cell);
         });
-        if (extraColumn) {
+        if (actions.length > 0) {
             const actionCell = document.createElement('td');
-            const button = document.createElement('button');
-            button.textContent = 'View Orders';
-            button.onclick = () => fetchOrderHistory(item.customer_id);
-            actionCell.appendChild(button);
+            actionCell.className = 'action-cell';
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.textContent = action.text;
+                button.className = 'action-button';
+                button.onclick = () => action.onClick(item);
+                actionCell.appendChild(button);
+            });
             row.appendChild(actionCell);
         }
-        console.log(row);
         tableBody.appendChild(row);
     });
 }
@@ -303,7 +308,6 @@ async function handleCustomerInput(event) {
     if (searchTerm.length > 2) {
         const customers = await fetchData(`/api/customers/${searchTerm}/`);
         customers.forEach(customer => {
-            console.log(customer)
             const option = document.createElement('option');
             option.value = `${customer.first_name} ${customer.last_name} ${customer.customer_id}`;
             customersList.appendChild(option);
@@ -427,6 +431,114 @@ async function SubmitEmployeeForm() {
     }
 }
 
+async function editItem(itemId) {
+    const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+    const cells = row.querySelectorAll('td');
+    const item = {
+        item_id: itemId,
+        category: cells[1].textContent,
+        name: cells[2].textContent,
+        price: parseFloat(cells[3].textContent)
+    };
+
+    if (!window.categories) {
+        window.categories = await fetchData('/api/categories/');
+    }
+
+    cells[1].innerHTML = createCategorySelect(item.category);
+    cells[2].innerHTML = `<input type="text" value="${item.name}" />`;
+    cells[3].innerHTML = `<input type="number" step="0.01" value="${item.price}" />`;
+
+    const actionCell = cells[cells.length - 1];
+    const editButton = actionCell.querySelector('button');
+    editButton.textContent = 'Cancel';
+    editButton.onclick = () => cancelEdit(itemId);
+
+    editedItems.add(itemId);
+    updateSaveChangesButton();
+}
+
+function createCategorySelect(currentCategory) {
+    const select = document.createElement('select');
+    window.categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.name;
+        option.textContent = category.name;
+        if (category.name === currentCategory) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+    return select.outerHTML;
+}
+
+async function cancelEdit(itemId) {
+    editedItems.delete(itemId);
+    const menuItems = await fetchData('/api/menu_items/');
+    const menuActions = [{
+        text: 'Edit Item',
+        onClick: (menuItem) => editItem(menuItem.item_id)
+    }];
+    await populateTable(menuItems, 'menu-items-body', menuActions);
+    editedItems.clear();
+    updateSaveChangesButton();
+}
+
+function updateSaveChangesButton() {
+    const saveButton = document.getElementById('saveChangesButton');
+    if (editedItems.size > 0) {
+        if (!saveButton) {
+            const newSaveButton = document.createElement('button');
+            newSaveButton.id = 'saveChangesButton';
+            newSaveButton.textContent = 'Save All Changes';
+            newSaveButton.onclick = saveAllChanges;
+            document.querySelector('#menu-items-body').insertAdjacentElement('afterend', newSaveButton);
+        }
+    } else {
+        saveButton?.remove();
+    }
+}
+
+async function saveAllChanges() {
+    const updatedItems = [];
+    editedItems.forEach(itemId => {
+        const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+        const cells = row.querySelectorAll('td');
+        updatedItems.push({
+            item_id: itemId,
+            category: cells[1].querySelector('select').value,
+            name: cells[2].querySelector('input').value,
+            price: parseFloat(cells[3].querySelector('input').value)
+        });
+    });
+
+    try {
+        const response = await fetch('/api/update_menu_items/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedItems)
+        });
+
+        if (response.ok) {
+            alert('Changes saved successfully!');
+            const menuItems = await fetchData('/api/menu_items/');
+            const menuActions = [{
+                text: 'Edit Item',
+                onClick: (menuItem) => editItem(menuItem.item_id)
+            }];
+            await populateTable(menuItems, 'menu-items-body', menuActions);
+            editedItems.clear();
+            updateSaveChangesButton();
+        } else {
+            throw new Error('Failed to save changes');
+        }
+    } catch (error) {
+        alert('Error saving changes: ' + error.message);
+    }
+}
+
 document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -444,19 +556,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('addCategoryForm').addEventListener('submit', submitCategoryForm);
 
         const menuItems = await fetchData('/api/menu_items/');
-        await populateTable(menuItems, 'menu-items-body');
+        const menuActions = [
+            {
+                text: 'Edit Item',
+                onClick: (menuItems) => editItem(menuItems.item_id)
+            }
+        ];
+        await populateTable(menuItems, 'menu-items-body', menuActions);
 
         const popularMenuItems = await fetchData('/api/popular_menu_items/');
         await populateTable(popularMenuItems, 'popular-menu-items-body');
 
         const customers = await fetchData('/api/customers/');
-        await populateTable(customers, 'customers-body', true);
+        const customerActions = [
+            {
+                text: 'View Orders',
+                onClick: (customer) => fetchOrderHistory(customer.customer_id)
+            }
+        ];
+        await populateTable(customers, 'customers-body', customerActions);
 
         const regularCustomers = await fetchData('/api/regular_customers/');
         await populateTable(regularCustomers, 'regular-customers-body');
 
         const employees = await fetchData('/api/employees/');
-        await populateTable(employees, 'employees-body');
+        employeesActions = [
+            {
+                text: 'Reset Password',
+                onClick: (employees) => fetchOrderHistory(employees.employee_id)
+            }
+        ];
+        await populateTable(employees, 'employees-body', employeesActions);
 
         const menuGrid = document.getElementById('menu-grid');
         menuItems.forEach(item => {

@@ -4,7 +4,43 @@ body {
     padding: 20px;
     background-color: #f4f4f4;
 }
+.action-cell {
+    white-space: normal;
+    text-align: left;
+}
+
+.action-button {
+    display: inline-block;
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+}
+
+.action-button:first-child {
+    margin-left: 0;
+}
+
+.action-button:last-child {
+    margin-right: 0;
+}
+
+td, th {
+    padding: 8px;
+    border: 1px solid #ddd;
+    word-break: break-word;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
 h1 {
+    text-align: center;
+}
+
+h2 {
     text-align: center;
 }
 .nav {
@@ -31,7 +67,7 @@ h1 {
     display: flex;
 }
 .section {
-    width: 80%;
+    width: 80%; /* Increased from 80% */
     margin: 20px 0;
     padding: 20px;
     background-color: white;
@@ -229,15 +265,29 @@ input[type="file"] {
     background-color: #0056b3;
 }
 
-/* Style for the file name display */
 .file-name {
     margin-left: 10px;
     font-style: italic;
 }
 
-/* Container for the file input and name display */
 .file-input-container {
     display: flex;
     align-items: center;
     margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .section {
+        width: 100%;
+        padding: 10px;
+    }
+
+    td, th {
+        padding: 5px;
+    }
+
+    .action-button {
+        padding: 4px 6px;
+        font-size: 0.8em;
+    }
 }
