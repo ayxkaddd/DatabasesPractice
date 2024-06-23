@@ -513,10 +513,11 @@ async function saveAllChanges() {
     });
 
     try {
-        const response = await fetch('/api/update_menu_items/', {
+        const response = await fetch('/api/menu_items/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': GetTokenHeader(),
             },
             body: JSON.stringify(updatedItems)
         });
@@ -537,6 +538,16 @@ async function saveAllChanges() {
     } catch (error) {
         alert('Error saving changes: ' + error.message);
     }
+}
+
+function resetPassword(emp_id) {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+    let password = "";
+    for (let i = 0, n = charset.length; i < length; ++i) {
+        password += charset.charAt(Math.floor(Math.random() * n));
+    }
+    alert(`Employee password was reset to ${password}`)
 }
 
 document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
@@ -583,7 +594,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         employeesActions = [
             {
                 text: 'Reset Password',
-                onClick: (employees) => fetchOrderHistory(employees.employee_id)
+                onClick: (employees) => resetPassword(employees.employee_id)
             }
         ];
         await populateTable(employees, 'employees-body', employeesActions);

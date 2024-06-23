@@ -77,8 +77,6 @@
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('token', data.token);
-                    alert('Login successful!');
-                    // Redirect to dashboard or home page
                     window.location.href = '/dashboard/';
                 } else {
                     const errorData = await response.json();
