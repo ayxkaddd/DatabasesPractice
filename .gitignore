@@ -1,6 +1,7 @@
 venv/
-__pycache__/
+__pycache__
 
+.dccache
 config.py
 static/css/style_test.css
 static/js/dashboard_test.js
