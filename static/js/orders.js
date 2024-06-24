@@ -66,7 +66,7 @@ function calculateChange() {
     const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const cashGiven = parseFloat(document.getElementById('cash-given').value);
     const change = cashGiven - totalAmount;
-    document.getElementById('change').textContent = `Change: ${change.toFixed(2)} UAH`;
+    document.getElementById('change').textContent = `${change.toFixed(2)}`;
 }
 
 async function submitOrder(event) {
