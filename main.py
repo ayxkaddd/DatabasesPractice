@@ -11,65 +11,15 @@ from datetime import datetime, timedelta
 import mysql.connector
 from mysql.connector import Error
 
-import config
-from auth import AuthHandler
 from models import *
+from auth import AuthHandler
+from helpers import get_db_connection, execute_query, execute_insert, fetch_and_map
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="static")
 
 auth_handler = AuthHandler()
-
-def get_db_connection():
-    try:
-        connection = mysql.connector.connect(
-            host=config.host,
-            database='royal_praktyka',
-            user=config.user,
-            password=config.password
-        )
-        if connection.is_connected():
-            return connection
-        else:
-            raise HTTPException(status_code=500, detail="Database connection failed")
-    except Error as e:
-        raise HTTPException(status_code=500, detail=f"Database connection error: {e}")
-
-
-def execute_query(db, query, params=None):
-    cursor = db.cursor()
-    try:
-        if params:
-            cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-        return cursor.fetchall()
-    finally:
-        cursor.close()
-
-
-def execute_insert(db, query, params):
-    cursor = db.cursor()
-    try:
-        cursor.execute(query, params)
-        db.commit()
-        return cursor.lastrowid
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-    finally:
-        cursor.close()
-
-
-def fetch_and_map(db, query, model_class, params=None):
-    cursor = db.cursor()
-    try:
-        cursor.execute(query, params)
-        columns = [col[0] for col in cursor.description]
-        return [model_class(**dict(zip(columns, row))) for row in cursor.fetchall()]
-    finally:
-        cursor.close()
 
 
 @app.post('/api/login')
@@ -91,6 +41,11 @@ def login(auth_details: AuthDetails, db: mysql.connector.MySQLConnection = Depen
         raise HTTPException(status_code=401, detail='Invalid username and/or password')
     token = auth_handler.encode_token(employee[0])
     return {'token': token}
+
+
+@app.get("/api/me/")
+def me(name=Depends(auth_handler.auth_wrapper)):
+    return name
 
 
 @app.get("/api/employees/", response_model=List[Employee])

@@ -174,19 +174,35 @@
     </style>
 </head>
 <body>
-    <script defer src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', path='js/api.js') }}"></script>
+    <script src="{{ url_for('static', path='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', path='js/menuItems.js') }}"></script>
+    <script src="{{ url_for('static', path='js/categories.js') }}"></script>
+    <script src="{{ url_for('static', path='js/orders.js') }}"></script>
+    <script src="{{ url_for('static', path='js/customers.js') }}"></script>
+    <script src="{{ url_for('static', path='js/employees.js') }}"></script>
+    <script src="{{ url_for('static', path='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/ui.js') }}"></script>
+    <script defer src="{{ url_for('static', path='js/main.js') }}"></script>
+    <header>
+    <div id="user-info">
+        <span id="user-name"></span>
+        <div class="user-dropdown">
+            <button onclick="log_out()">Log Out</button>
+        </div>
+    </div>
     <div class="nav">
         <a href="#" onclick="showSection('menu-items')">Menu Items</a>
         <a href="#" onclick="showSection('popular-menu-items')">Popular Menu Items</a>
         <a href="#" onclick="showSection('add-new-order')">Add New Order</a>
         <a href="#" onclick="showSection('customers')">Customers</a>
-        <!-- <a href="#" onclick="showSection('regular-customers')">Regular Customers</a> -->
         <a href="#" onclick="showSection('employees')">Employees</a>
         <a href="#" onclick="showSection('chart')">Graph</a>
     </div>
+    </header>
     <div class="container" id="menu-items">
         <div class="section">
-            <h2>Menu Items</h2>
+            <h2 class="center">Menu Items</h2>
             <table>
                 <thead>
                     <tr>
@@ -201,7 +217,7 @@
             </table>
         </div>
         <div class="section">
-            <h2>Add New Category</h2>
+            <h2 class="center">Add New Category</h2>
             <div class="form-container">
                 <form id="addCategoryForm">
                     <label for="category_name">Category Name:</label>
@@ -211,7 +227,7 @@
             </div>
         </div>
         <div class="section">
-            <h2>Add New Item</h2>
+            <h2 class="center">Add New Item</h2>
             <div class="form-container">
                 <form id="addItemForm">
                     <label for="category">Category:</label>
@@ -237,7 +253,7 @@
     </div>
     <div class="container" id="popular-menu-items">
         <div class="section">
-            <h2>Popular Menu Items</h2>
+            <h2 class="center">Popular Menu Items</h2>
             <table>
                 <thead>
                     <tr>
@@ -252,7 +268,7 @@
 
     <div class="container" id="add-new-order">
         <div class="section">
-            <h2>Add New Order</h2>
+            <h2 class="center">Add New Order</h2>
             <div class="form-container">
                 <form id="addOrderForm">
                     <div id="menu-grid" class="menu-grid"></div>
@@ -294,7 +310,7 @@
 
     <div class="container" id="customers">
         <div class="section">
-            <h2>Customers</h2>
+            <h2 class="center">Customers</h2>
             <table>
                 <thead>
                     <tr>
@@ -308,7 +324,7 @@
             </table>
         </div>
         <div class="section" id="order-history">
-            <h2>Order History</h2>
+            <h2 class="center">Order History</h2>
             <table>
                 <thead>
                     <tr>
@@ -323,7 +339,7 @@
             </table>
         </div>
         <div class="section">
-            <h2>Regular Customers</h2>
+            <h2 class="center">Regular Customers</h2>
             <table>
                 <thead>
                     <tr>
@@ -339,7 +355,7 @@
     </div>
     <div class="container" id="employees">
         <div class="section">
-            <h2>Employees</h2>
+            <h2 class="center">Employees</h2>
             <table>
                 <thead>
                     <tr>
@@ -355,7 +371,7 @@
             </table>
         </div>
         <div class="section">
-            <h2>Add New Employee</h2>
+            <h2 class="center">Add New Employee</h2>
             <div class="form-container">
                 <form id="addItemForm">
                     <label for="first_name">First Name:</label>
@@ -375,7 +391,7 @@
     </div>
     <div class="container" id="chart">
         <div class="section">
-            <h1>Graph</h1>
+            <h2 class="center">Graph</h2>
             <canvas id="orderChart"></canvas>
         </div>
     </div>

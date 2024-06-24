@@ -3,7 +3,7 @@ let selectedItems = [];
 let editedItems = new Set();
 
 function GetTokenHeader() {
-	token = localStorage.getItem("token");
+    token = localStorage.getItem("token");
     return `Bearer ${token}`
 }
 
@@ -540,6 +540,11 @@ async function saveAllChanges() {
     }
 }
 
+function log_out() {
+    localStorage.removeItem("token");
+    window.location.href="/"
+}
+
 function resetPassword(emp_id) {
     const length = 12;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
@@ -555,6 +560,10 @@ document.getElementById('addOrderForm').addEventListener('submit', submitOrder);
 document.addEventListener('DOMContentLoaded', async () => {
     showSection('menu-items');
     try {
+        const user_data = await fetchData("/api/me/");
+        const userNameElement = document.getElementById('user-name');
+        userNameElement.textContent = `${user_data}`;
+
         const categorySelect = document.getElementById('category');
         const categories = await fetchData("/api/categories/");
         categories.forEach(category => {
