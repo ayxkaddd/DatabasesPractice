@@ -4,16 +4,34 @@ body {
     padding: 20px;
     background-color: #f4f4f4;
 }
-.action-cell {
-    white-space: normal;
-    text-align: left;
+
+.center {
+    text-align: center;
 }
 
 header {
-    position: relative;
     background-color: #007BFF;
     color: white;
     padding: 10px 0;
+    text-align: center;
+    position: relative;
+}
+
+.nav {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.nav a:hover {
+    text-decoration: underline;
 }
 
 #user-info {
@@ -61,26 +79,37 @@ header {
     display: block;
 }
 
-.action-button {
-    display: inline-block;
+.container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
 }
 
-.action-button:hover {
-    background-color: #0056b3;
+.container.active {
+    display: flex;
 }
 
-.action-button:first-child {
-    margin-left: 0;
+.section {
+    width: 80%;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.action-button:last-child {
-    margin-right: 0;
+.section h2 {
+    margin-top: 0;
 }
 
-td, th {
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
     padding: 8px;
     border: 1px solid #ddd;
-    word-break: break-word;
+    text-align: left;
 }
 
 th {
@@ -88,60 +117,11 @@ th {
     font-weight: bold;
 }
 
-h1 {
-    text-align: center;
-}
-
-.center {
-    text-align: center;
-}
-.nav {
-    display: flex;
-    justify-content: center;
-    background-color: #007BFF;
-    padding: 10px;
-}
-.nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 18px;
-}
-.nav a:hover {
-    text-decoration: underline;
-}
-.container {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-}
-.container.active {
-    display: flex;
-}
-.section {
-    width: 80%; /* Increased from 80% */
-    margin: 20px 0;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-.section h2 {
-    margin-top: 0;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-table, th, td {
-    border: 1px solid #ddd;
-}
-th, td {
-    padding: 8px;
+.action-cell {
+    white-space: normal;
     text-align: left;
 }
-th {
-    background-color: #f2f2f2;
-}
+
 button {
     padding: 5px 10px;
     background-color: #007BFF;
@@ -149,92 +129,13 @@ button {
     border: none;
     cursor: pointer;
 }
+
 button:hover {
     background-color: #0056b3;
 }
 
-header {
-    background-color: #007BFF;
-    color: white;
-    padding: 10px 0;
-    text-align: center;
-}
-
-.map {
-    text-align: center;
-    margin: 20px 0;
-}
-.menu-items {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.menu-item {
-    background-color: white;
-    border: 1px solid #ddd;
-    margin: 10px;
-    width: 200px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    text-align: center;
-}
-.menu-item img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-}
-.menu-item h3 {
-    margin: 10px 0;
-}
-.menu-item p {
-    color: #007BFF;
-    font-weight: bold;
-}
-.menu-item .remove-button {
-    top: 5px;
-    right: 5px;
-    background-color: red;
-    color: white;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-}
-.testimonials {
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin: 20px 0;
-}
-.testimonial {
-    margin-bottom: 20px;
-}
-.testimonial p {
-    font-style: italic;
-}
-.testimonial h4 {
-    margin: 10px 0 0;
-    text-align: right;
-}
-input[type="text"],
-input[type="number"] {
-    max-width: 300px;
-    padding: 10px;
-    margin: 8px 0;
+.action-button {
     display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus {
-    border-color: #007BFF;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-input[list] {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
 }
 
 .form-container {
@@ -252,44 +153,25 @@ label {
     font-weight: bold;
 }
 
+input[type="text"],
+input[type="number"],
 select {
-    width: 200px;
+    width: 100%;
+    max-width: 300px;
     padding: 10px;
     margin: 8px 0;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: white;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="%23007BFF" d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
 }
 
+input[type="text"]:focus,
+input[type="number"]:focus,
 select:focus {
     border-color: #007BFF;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-select::-ms-expand {
-    display: none;
-}
-
-select:hover {
-    border-color: #007BFF;
-}
-
-select:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
-}
-
-option {
-    padding: 10px;
 }
 
 input[type="file"] {
@@ -301,7 +183,6 @@ input[type="file"] {
     z-index: -1;
 }
 
-/* Style the label to look like a button */
 .file-input-label {
     display: inline-block;
     padding: 10px 15px;
@@ -328,6 +209,37 @@ input[type="file"] {
     margin: 10px 0;
 }
 
+.menu-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.menu-item {
+    background-color: white;
+    border: 1px solid #ddd;
+    margin: 10px;
+    width: 200px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.menu-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.menu-item h3 {
+    margin: 10px 0;
+}
+
+.menu-item p {
+    color: #007BFF;
+    font-weight: bold;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .section {
         width: 100%;
