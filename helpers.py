@@ -8,7 +8,7 @@ def get_db_connection():
     try:
         connection = mysql.connector.connect(
             host=config.host,
-            database='royal_praktyka',
+            database=config.database,
             user=config.user,
             password=config.password
         )
