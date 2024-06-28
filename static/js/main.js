@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const user_data = await fetchData("/api/me/");
         const userNameElement = document.getElementById('user-name');
-        userNameElement.textContent = `${user_data}`;
+        userNameElement.textContent = `${user_data.name}`;
 
         const categorySelect = document.getElementById('category');
         const categories = await fetchData("/api/categories/");

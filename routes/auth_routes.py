@@ -9,7 +9,7 @@ auth_handler = AuthHandler()
 @router.post('/api/login')
 def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
     query = """
-    SELECT e.first_name, e.employee_id, e.employee_code, c.password
+    SELECT e.employee_id, e.first_name, e.employee_code, c.password
     FROM Employees e
     JOIN Credentials c ON e.employee_id = c.employee_id
     WHERE e.employee_code = %s
@@ -19,12 +19,14 @@ def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
     if not result:
         raise HTTPException(status_code=401, detail="Invalid employee code")
     employee = result[0]
-    if not auth_handler.verify_password(auth_details.password, employee[3]):
+    first_name = employee[1]
+    hashed_password = employee[3]
+    if not auth_handler.verify_password(auth_details.password, hashed_password):
         raise HTTPException(status_code=401, detail='Invalid username and/or password')
-    token = auth_handler.encode_token(employee[0])
+    token = auth_handler.encode_token(first_name)
     return {'token': token}
 
 
 @router.get("/api/me/")
 def me(name=Depends(auth_handler.auth_wrapper)):
-    return name
+    return {"name": name}
