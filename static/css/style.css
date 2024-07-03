@@ -255,3 +255,89 @@ input[type="file"] {
         font-size: 0.8em;
     }
 }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+}
+
+.dashboard-card i {
+    font-size: 48px;
+    margin-bottom: 10px;
+    /* color: #007BFF; */
+}
+
+.dashboard-card .blue-color {
+    color: #007BFF;
+}
+
+.dashboard-card h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.dashboard-card p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.dashboard-card .change {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.change.positive {
+    color: #28a745;
+}
+
+.change.negative {
+    color: #dc3545;
+}
+
+.fa-arrow-up {
+    color: #28a745;
+}
+
+.fa-arrow-down {
+    color: #dc3545;
+}
+
+.dashboard-card .large-number {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+#top-selling-item {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.change-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.change-indicator.positive {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.change-indicator.negative {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}

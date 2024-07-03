@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const menuItemElement = createMenuItemElement(item);
             menuGrid.appendChild(menuItemElement);
         });
-
+        fetchDashboardData();
     } catch (error) {
         console.error('Failed to fetch data:', error);
     }

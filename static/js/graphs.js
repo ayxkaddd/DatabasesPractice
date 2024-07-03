@@ -2,17 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('orderChart').getContext('2d');
     let orderChart;
 
-    // async function fetchData() {
-    //     const response = await fetch(`/api/reports/?period=day&start_date=2024-06-01&end_date=2024-06-30`,{
-    //         method: 'GET',
-    //         headers: {
-    //             'Authorization': GetTokenHeader(),
-    //         }
-    //     });
-    //     const data = await response.json();
-    //     return data;
-    // }
-
     function updateChart(data) {
         if (orderChart) {
             orderChart.destroy();
