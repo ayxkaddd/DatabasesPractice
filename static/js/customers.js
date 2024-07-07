@@ -15,7 +15,7 @@ async function handleCustomerInput(event) {
 
 async function fetchOrderHistory(customerId) {
     try {
-        const orderHistory = await fetchData(`/api/order_history/${customerId}`);
+        const orderHistory = await fetchData(`/api/orders/${customerId}`);
         await populateTable(orderHistory, 'order-history-body');
     } catch (error) {
         console.error('Failed to fetch order history:', error);

@@ -48,7 +48,7 @@ async function submitAllItems() {
         price: parseInt(item.price)
     }));
 
-    const response = await fetch('/api/add_new_item/', {
+    const response = await fetch('/api/menu_items/add/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ async function saveAllChanges() {
 
     try {
         const response = await fetch('/api/menu_items/', {
-            method: 'POST',
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': GetTokenHeader(),

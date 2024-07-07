@@ -93,7 +93,7 @@ async function submitOrder(event) {
     };
 
     try {
-        const response = await fetch('/api/order_add/', {
+        const response = await fetch('/api/orders/add/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -103,6 +103,7 @@ async function submitOrder(event) {
         });
         const data = await response.json();
         alert('Order added successfully');
+        window.location.reload();
     } catch (error) {
         console.error('Error adding order:', error);
     }

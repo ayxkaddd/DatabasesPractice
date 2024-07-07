@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
-from models import AuthDetails
+from models import AuthDetails, Employee
 from auth import AuthHandler
-from helpers import get_db_connection, execute_query
+from helpers import fetch_and_map, get_db_connection, execute_query
 
 router = APIRouter()
 auth_handler = AuthHandler()
 
-@router.post('/api/login')
+@router.post('/api/login/')
 def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
     query = """
     SELECT e.employee_id, e.first_name, e.employee_code, c.password
@@ -19,14 +19,17 @@ def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
     if not result:
         raise HTTPException(status_code=401, detail="Invalid employee code")
     employee = result[0]
-    first_name = employee[1]
+    print(employee)
+    employee_code = employee[2]
     hashed_password = employee[3]
     if not auth_handler.verify_password(auth_details.password, hashed_password):
         raise HTTPException(status_code=401, detail='Invalid username and/or password')
-    token = auth_handler.encode_token(first_name)
+    token = auth_handler.encode_token(employee_code)
     return {'token': token}
 
 
-@router.get("/api/me/")
-def me(name=Depends(auth_handler.auth_wrapper)):
-    return {"name": name}
+@router.get("/api/me/", response_model=Employee)
+def me(db=Depends(get_db_connection), code=Depends(auth_handler.auth_wrapper)):
+    query = "SELECT * FROM `Employees` WHERE employee_code = %s;"
+    response = fetch_and_map(db, query, Employee, (code,))
+    return response[0]

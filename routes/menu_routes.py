@@ -20,7 +20,7 @@ def get_menu_items(db=Depends(get_db_connection)):
     return fetch_and_map(db, query, Menu)
 
 
-@router.post("/api/menu_items/")
+@router.patch("/api/menu_items/")
 async def update_menu_items(
     items: List[Menu], db = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     cursor = db.cursor()
@@ -49,7 +49,7 @@ async def update_menu_items(
         cursor.close()
 
 
-@router.get("/api/popular_menu_items/", response_model=List[PopularMenuItems])
+@router.get("/api/menu_items/popular/", response_model=List[PopularMenuItems])
 def get_popular_menu_items(db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT m.name AS item, SUM(oi.quantity) AS total_quantity
@@ -62,7 +62,7 @@ def get_popular_menu_items(db=Depends(get_db_connection), _=Depends(auth_handler
     return fetch_and_map(db, query, PopularMenuItems)
 
 
-@router.post("/api/add_new_item/", response_model=List[Menu])
+@router.post("/api/menu_items/add/", response_model=List[Menu])
 def add_new_item(items: List[Menu], db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     added_items = []
     try:

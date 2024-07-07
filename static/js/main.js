@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const user_data = await fetchData("/api/me/");
         const userNameElement = document.getElementById('user-name');
-        userNameElement.textContent = `${user_data.name}`;
+        userNameElement.textContent = `${user_data.first_name}`;
 
         const categorySelect = document.getElementById('category');
         const categories = await fetchData("/api/categories/");
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
         await populateTable(menuItems, 'menu-items-body', menuActions);
 
-        const popularMenuItems = await fetchData('/api/popular_menu_items/');
+        const popularMenuItems = await fetchData('/api/menu_items/popular/');
         await populateTable(popularMenuItems, 'popular-menu-items-body');
 
         const customers = await fetchData('/api/customers/');
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
         await populateTable(customers, 'customers-body', customerActions);
 
-        const regularCustomers = await fetchData('/api/regular_customers/');
+        const regularCustomers = await fetchData('/api/customers/regular_customers/');
         await populateTable(regularCustomers, 'regular-customers-body');
 
         const employees = await fetchData('/api/employees/');

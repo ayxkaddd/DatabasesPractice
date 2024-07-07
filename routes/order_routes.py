@@ -1,13 +1,14 @@
 from datetime import datetime
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from models import Order
-from helpers import get_db_connection, execute_insert
+from models import Order, OrderHistory
+from helpers import fetch_and_map, get_db_connection, execute_insert
 from auth import AuthHandler
 
 router = APIRouter()
 auth_handler = AuthHandler()
 
-@router.post("/api/order_add/", status_code=201)
+@router.post("/api/orders/add/", status_code=201)
 def add_new_order(order: Order, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     try:
         customer_id = order.customer.customer_id
@@ -26,3 +27,20 @@ def add_new_order(order: Order, db=Depends(get_db_connection), _=Depends(auth_ha
         return {"message": "Order was successfully added"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding new order: {str(e)}")
+
+
+@router.get("/api/orders/{client_id}", response_model=List[OrderHistory])
+def get_order_history(client_id: int, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
+    query = """
+        SELECT o.order_id, o.order_date,
+               GROUP_CONCAT(m.name ORDER BY m.name SEPARATOR ', ') AS item,
+               SUM(oi.quantity) AS quantity,
+               SUM(oi.quantity * m.price) AS total_price
+        FROM Orders o
+        JOIN Order_Items oi ON o.order_id = oi.order_id
+        JOIN Menu_Items m ON oi.item_id = m.item_id
+        WHERE o.customer_id = %s
+        GROUP BY o.order_id, o.order_date
+        ORDER BY o.order_date;
+    """
+    return fetch_and_map(db, query, OrderHistory, (client_id,))
