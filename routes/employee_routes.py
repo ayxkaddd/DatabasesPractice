@@ -7,16 +7,16 @@ from mysql.connector import Error
 from helpers import get_db_connection, fetch_and_map, execute_insert, execute_query
 from auth import AuthHandler
 
-router = APIRouter()
+router = APIRouter(prefix="/api/employees")
 auth_handler = AuthHandler()
 
-@router.get("/api/employees/", response_model=List[Employee])
+@router.get("/", response_model=List[Employee])
 def get_employees(db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM Employees;"
     return fetch_and_map(db, query, Employee)
 
 
-@router.post('/api/employees/', status_code=201)
+@router.post('/', status_code=201)
 def create_employee(employee: Employee, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     if not employee.password:
         raise HTTPException(status_code=400, detail="Password is required")

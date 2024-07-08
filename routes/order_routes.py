@@ -5,10 +5,10 @@ from models import Order, OrderHistory
 from helpers import fetch_and_map, get_db_connection, execute_insert
 from auth import AuthHandler
 
-router = APIRouter()
+router = APIRouter(prefix="/api/orders")
 auth_handler = AuthHandler()
 
-@router.post("/api/orders/add/", status_code=201)
+@router.post("/add/", status_code=201)
 def add_new_order(order: Order, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     try:
         customer_id = order.customer.customer_id
@@ -29,7 +29,7 @@ def add_new_order(order: Order, db=Depends(get_db_connection), _=Depends(auth_ha
         raise HTTPException(status_code=500, detail=f"Error adding new order: {str(e)}")
 
 
-@router.get("/api/orders/{client_id}", response_model=List[OrderHistory])
+@router.get("/{client_id}", response_model=List[OrderHistory])
 def get_order_history(client_id: int, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT o.order_id, o.order_date,

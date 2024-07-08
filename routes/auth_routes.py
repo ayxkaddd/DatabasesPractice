@@ -19,11 +19,10 @@ def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
     if not result:
         raise HTTPException(status_code=401, detail="Invalid employee code")
     employee = result[0]
-    print(employee)
     employee_code = employee[2]
     hashed_password = employee[3]
     if not auth_handler.verify_password(auth_details.password, hashed_password):
-        raise HTTPException(status_code=401, detail='Invalid username and/or password')
+        raise HTTPException(status_code=401, detail="Invalid username and/or password")
     token = auth_handler.encode_token(employee_code)
     return {'token': token}
 
@@ -31,5 +30,7 @@ def login(auth_details: AuthDetails, db=Depends(get_db_connection)):
 @router.get("/api/me/", response_model=Employee)
 def me(db=Depends(get_db_connection), code=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM `Employees` WHERE employee_code = %s;"
-    response = fetch_and_map(db, query, Employee, (code,))
-    return response[0]
+    result = fetch_and_map(db, query, Employee, (code,))
+    if not result:
+        raise HTTPException(500, detail="User is not found")
+    return result[0]

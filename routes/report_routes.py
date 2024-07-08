@@ -9,7 +9,7 @@ router = APIRouter()
 auth_handler = AuthHandler()
 
 @router.get("/api/reports/", response_model=List[ReportSummary])
-def get_reports(period: str = "day", start_date: Optional[datetime] = None, end_date: Optional[datetime] = None, 
+def get_reports(period: str = "day", start_date: Optional[datetime] = None, end_date: Optional[datetime] = None,
                 db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     if period not in ["day", "week", "month"]:
         raise HTTPException(status_code=400, detail="Invalid period. Must be 'day', 'week', or 'month'.")

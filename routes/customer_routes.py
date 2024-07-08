@@ -4,17 +4,16 @@ from models import Customer, Regulars
 from helpers import get_db_connection, fetch_and_map
 from auth import AuthHandler
 
-router = APIRouter()
+router = APIRouter(prefix="/api/customers")
 auth_handler = AuthHandler()
 
-@router.get("/api/customers/", response_model=List[Customer])
+@router.get("/", response_model=List[Customer])
 def get_customers(db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = "SELECT * FROM Customers;"
     return fetch_and_map(db, query, Customer)
 
 
-
-@router.get("/api/customers/regular_customers/", response_model=List[Regulars])
+@router.get("/regular_customers/", response_model=List[Regulars])
 def get_regular_customers(db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT c.customer_id, c.first_name, c.last_name, COUNT(o.order_id) AS orders_count
@@ -27,7 +26,7 @@ def get_regular_customers(db=Depends(get_db_connection), _=Depends(auth_handler.
     return fetch_and_map(db, query, Regulars)
 
 
-@router.get("/api/customers/{search_query}/", response_model=List[Customer])
+@router.get("/{search_query}/", response_model=List[Customer])
 def search_customers(search_query: str, db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT customer_id, first_name, last_name

@@ -6,10 +6,10 @@ from models import Menu, PopularMenuItems
 from helpers import get_db_connection, fetch_and_map, execute_insert, execute_query
 from auth import AuthHandler
 
-router = APIRouter()
+router = APIRouter(prefix="/api/menu_items")
 auth_handler = AuthHandler()
 
-@router.get("/api/menu_items/", response_model=List[Menu])
+@router.get("/", response_model=List[Menu])
 def get_menu_items(db=Depends(get_db_connection)):
     query = """
         SELECT m.item_id, c.name AS category, m.name, m.price
@@ -20,7 +20,7 @@ def get_menu_items(db=Depends(get_db_connection)):
     return fetch_and_map(db, query, Menu)
 
 
-@router.patch("/api/menu_items/")
+@router.patch("/")
 async def update_menu_items(
     items: List[Menu], db = Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     cursor = db.cursor()
@@ -49,7 +49,7 @@ async def update_menu_items(
         cursor.close()
 
 
-@router.get("/api/menu_items/popular/", response_model=List[PopularMenuItems])
+@router.get("/popular/", response_model=List[PopularMenuItems])
 def get_popular_menu_items(db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     query = """
         SELECT m.name AS item, SUM(oi.quantity) AS total_quantity
@@ -62,7 +62,7 @@ def get_popular_menu_items(db=Depends(get_db_connection), _=Depends(auth_handler
     return fetch_and_map(db, query, PopularMenuItems)
 
 
-@router.post("/api/menu_items/add/", response_model=List[Menu])
+@router.post("/add/", response_model=List[Menu])
 def add_new_item(items: List[Menu], db=Depends(get_db_connection), _=Depends(auth_handler.auth_wrapper)):
     added_items = []
     try:
